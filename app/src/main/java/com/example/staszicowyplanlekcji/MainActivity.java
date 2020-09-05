@@ -7,6 +7,8 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import android.app.DatePickerDialog;
+import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.StrictMode;
@@ -31,17 +33,15 @@ import java.util.Calendar;
 import java.util.HashMap;
 import java.util.List;
 
-public class MainActivity extends AppCompatActivity implements DatePickerDialog.OnDateSetListener, AdapterView.OnItemSelectedListener {
+public class MainActivity extends AppCompatActivity {
 
     int classNumber;
-
     TextView planik;
-    Spinner wybor_klasy;
     Calendar calendar;
     TextView tekst;
-    Button przyc;
     Button nextButton;
     Button prevButton;
+    Button settButton;
     Boolean showSala = true;
     Boolean showNauczyciel = true;
     List<String> nazwy_klas = new ArrayList<>();
@@ -55,25 +55,19 @@ public class MainActivity extends AppCompatActivity implements DatePickerDialog.
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-        przyc = findViewById(R.id.guzior);
         tekst = findViewById(R.id.dataText);
-        wybor_klasy = findViewById(R.id.wyborKlasy);
         calendar = Calendar.getInstance();
         repairDate(calendar);
         nextButton = findViewById(R.id.next);
         prevButton = findViewById(R.id.prev);
+        settButton = findViewById(R.id.settingsButton);
+        SharedPreferencesManager spm = new SharedPreferencesManager(this);
+        classNumber = spm.getWybrana();
         new loadClasses().execute();
-        calendarChanged(calendar);
         recyclerView = findViewById(R.id.recycler);
         adapter = new RecyclerViewDefaultAdapter(this, zajecia);
         initRecyclerView();
-        przyc.setOnClickListener(new View.OnClickListener(){
-            @Override
-            public void onClick(View v) {
-                DialogFragment datePicker = new DatePickerFragment();
-                datePicker.show(getSupportFragmentManager(), "Date Picker");
-            }
-        });
+
 
         prevButton.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -90,33 +84,16 @@ public class MainActivity extends AppCompatActivity implements DatePickerDialog.
                 calendarChanged(calendar);
             }
         });
-    }
 
-    @Override
-    public void onDateSet(DatePicker view, int year, int month, int dayOfMonth) {
-        Calendar newCalendar = Calendar.getInstance();
-        newCalendar.set(Calendar.DAY_OF_MONTH, dayOfMonth);
-        newCalendar.set(Calendar.MONTH, month);
-        newCalendar.set(Calendar.YEAR, year);
-        System.out.println(newCalendar.get(Calendar.DAY_OF_WEEK));
-        if(newCalendar.get(Calendar.DAY_OF_WEEK)==1||newCalendar.get(Calendar.DAY_OF_WEEK)==7){
-            Toast.makeText(getApplicationContext(), "w weekend nie ma lekcji :)", Toast.LENGTH_LONG).show();
-        }else{
-            calendar = newCalendar;
-            calendarChanged(calendar);
-        }
-    }
-
-    @Override
-    public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
-        classNumber = position;
-        System.out.println(position);
-        new loadDay().execute();
-    }
-
-    @Override
-    public void onNothingSelected(AdapterView<?> parent) {
-
+        settButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                updateDate(calendar);
+                SharedPreferencesManager spm = new SharedPreferencesManager(MainActivity.this.getApplicationContext());
+                spm.setWyb(classNumber);
+                startActivityForResult(new Intent(MainActivity.this.getApplication(), SettingsActivity.class), 1);
+            }
+        });
     }
 
     public class loadClasses extends AsyncTask<Void, Void, Void>{
@@ -140,7 +117,8 @@ public class MainActivity extends AppCompatActivity implements DatePickerDialog.
         @Override
         protected void onPostExecute(Void aVoid) {
             super.onPostExecute(aVoid);
-            updateSpinner();
+            saveKlasy();
+            calendarChanged(calendar);
         }
     }
 
@@ -207,11 +185,7 @@ public class MainActivity extends AppCompatActivity implements DatePickerDialog.
         }
 
     }
-    private void updateSpinner(){
-        ArrayAdapter<String> adapter = new ArrayAdapter<String>(this, android.R.layout.simple_spinner_item, nazwy_klas);
-        wybor_klasy.setAdapter(adapter);
-        wybor_klasy.setOnItemSelectedListener(this);
-    }
+
 
     private void initRecyclerView(){
         recyclerView.setAdapter(adapter);
@@ -239,7 +213,7 @@ public class MainActivity extends AppCompatActivity implements DatePickerDialog.
     }
 
     private void calendarChanged(Calendar c){
-        tekst.setText(dayParser(c.get(Calendar.DAY_OF_WEEK))+", "+Integer.toString(c.get(Calendar.DAY_OF_MONTH))+"."+Integer.toString(c.get(Calendar.MONTH)+1)+"."+Integer.toString(c.get(Calendar.YEAR)));
+        tekst.setText(nazwy_klas.get(classNumber)+" "+dayParser(c.get(Calendar.DAY_OF_WEEK))+", "+Integer.toString(c.get(Calendar.DAY_OF_MONTH))+"."+Integer.toString(c.get(Calendar.MONTH)+1)+"."+Integer.toString(c.get(Calendar.YEAR)));
 
         new loadDay().execute();
     }
@@ -307,4 +281,40 @@ public class MainActivity extends AppCompatActivity implements DatePickerDialog.
         }
         return out;
     }
+
+    void saveKlasy(){
+        SharedPreferencesManager spm = new SharedPreferencesManager(this);
+
+        String parsedKlasy = "";
+        for(String s : nazwy_klas){
+            parsedKlasy+=s+"-";
+        }
+        parsedKlasy=parsedKlasy.substring(0, parsedKlasy.length()-1);
+        spm.setLekcje(parsedKlasy);
+    }
+
+    void updateDate(Calendar c){
+        SharedPreferencesManager spm = new SharedPreferencesManager(this);
+        spm.setDay(c.get(Calendar.DAY_OF_MONTH));
+        spm.setMonth(c.get(Calendar.MONTH));
+        spm.setYear(c.get(Calendar.YEAR));
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+
+        SharedPreferencesManager spm = new SharedPreferencesManager(this);
+        if (requestCode == 1) {
+            System.out.println("exited settings");
+            calendar.set(Calendar.YEAR, spm.getYear());
+            calendar.set(Calendar.DAY_OF_MONTH, spm.getDay());
+            calendar.set(Calendar.MONTH, spm.getMonth());
+            System.out.println(calendar.get(Calendar.DAY_OF_MONTH));
+            System.out.println(calendar.get(Calendar.MONTH));
+            System.out.println(calendar.get(Calendar.YEAR));
+            classNumber = spm.getWybrana();
+            calendarChanged(calendar);
+        }
+    }//onActivityResult
 }
