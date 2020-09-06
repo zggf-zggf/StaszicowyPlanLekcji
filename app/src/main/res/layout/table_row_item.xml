@@ -9,6 +9,7 @@
 
     <TextView
         android:id="@+id/godzTekst"
+        android:textColor="@color/defaultText"
         android:gravity="center"
         android:layout_weight="1.1"
         android:layout_width="0dp"
@@ -17,14 +18,12 @@
         android:background="#FFFF99"
         android:textSize="14dp"
         android:textAlignment="center"
-        android:textColor="#000000"
         android:fontFamily="sans-serif-medium"
         android:textStyle="bold"
         >
 
     </TextView>
     <TextView
-        android:textColor="#000000"
         android:layout_margin="10dp"
         android:id="@+id/lekcjaText"
         android:gravity="center"
@@ -33,9 +32,10 @@
         android:layout_weight="3"
         android:background="#FFFFCC"
         android:textSize="18dp"
-        android:text="lekcjaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+        android:text="A. Adamczuk-Kukiełka"
         android:textAlignment="center"
-        android:fontFamily="sans-serif-medium">
+        android:fontFamily="sans-serif-medium"
+        android:textColor="@color/defaultText">
     </TextView>
 
 </LinearLayout>

@@ -1,6 +1,7 @@
 package com.example.staszicowyplanlekcji;
 
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.appcompat.app.AppCompatDelegate;
 import androidx.fragment.app.DialogFragment;
 
 import android.app.Activity;
@@ -11,8 +12,11 @@ import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
+import android.widget.CheckBox;
+import android.widget.CompoundButton;
 import android.widget.DatePicker;
 import android.widget.Spinner;
+import android.widget.Switch;
 import android.widget.Toast;
 
 import java.util.ArrayList;
@@ -26,6 +30,11 @@ public class SettingsActivity extends AppCompatActivity  implements DatePickerDi
     Spinner wybor_klasy;
     Calendar calendar;
     Button przyc;
+    Button exitButton;
+    Switch darkmodeCheckbox;
+    Switch saleSwitch;
+    Switch nauczSwitch;
+    Boolean useDarkmode = false;
     List<String> nazwy_klas = new ArrayList<>();
 
     @Override
@@ -37,12 +46,19 @@ public class SettingsActivity extends AppCompatActivity  implements DatePickerDi
         Intent returnIntent = new Intent();
         setResult(Activity.RESULT_CANCELED, returnIntent);
 
+        exitButton = findViewById(R.id.exitButton);
         przyc = findViewById(R.id.guzior);
         wybor_klasy = findViewById(R.id.wyborKlasy);
+        darkmodeCheckbox = findViewById(R.id.darkmodeCheck);
+        saleSwitch = findViewById(R.id.SaleCheck);
+        nauczSwitch = findViewById(R.id.nauczCheck);
         SharedPreferencesManager spm = new SharedPreferencesManager(this);
         classNumber = spm.getWybrana();
+        useDarkmode = spm.getDarkmode();
+        saleSwitch.setChecked(spm.getSala());
+        nauczSwitch.setChecked(spm.getNaucz());
+        darkmodeCheckbox.setChecked(useDarkmode);
         getKlasy();
-        updateSpinner();
 
         przyc.setOnClickListener(new View.OnClickListener(){
             @Override
@@ -51,8 +67,55 @@ public class SettingsActivity extends AppCompatActivity  implements DatePickerDi
                 datePicker.show(getSupportFragmentManager(), "Date Picker");
             }
         });
+
+        darkmodeCheckbox.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+            @Override
+            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+                useDarkmode = isChecked;
+                SharedPreferencesManager spm = new SharedPreferencesManager(getApplicationContext());
+                spm.setDarkmode(isChecked);
+                updateTheme();
+            }
+        });
+
+        saleSwitch.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+            @Override
+            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+                SharedPreferencesManager spm = new SharedPreferencesManager(getApplicationContext());
+                spm.setSala(isChecked);
+            }
+        });
+
+        nauczSwitch.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+            @Override
+            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+                SharedPreferencesManager spm = new SharedPreferencesManager(getApplicationContext());
+                spm.setNaucz(isChecked);
+            }
+        });
+
+        exitButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                finish();
+            }
+        });
     }
 
+    void updateTheme(){
+        System.out.println("theme: "+useDarkmode);
+        if(useDarkmode==true) {
+            AppCompatDelegate.setDefaultNightMode(
+                    AppCompatDelegate.MODE_NIGHT_YES);
+        }else{
+            AppCompatDelegate.setDefaultNightMode(
+                    AppCompatDelegate.MODE_NIGHT_NO);
+        }
+        finish();
+        overridePendingTransition(0, 0);
+        startActivity(getIntent());
+        overridePendingTransition(0, 0);
+    }
     @Override
     public void onNothingSelected(AdapterView<?> parent) {
 
@@ -67,7 +130,7 @@ public class SettingsActivity extends AppCompatActivity  implements DatePickerDi
     }
 
     private void updateSpinner(){
-        ArrayAdapter<String> adapter = new ArrayAdapter<String>(this, android.R.layout.simple_spinner_item, nazwy_klas);
+        ArrayAdapter<String> adapter = new ArrayAdapter<String>(this, R.layout.spinner_item, nazwy_klas);
         wybor_klasy.setAdapter(adapter);
         wybor_klasy.setOnItemSelectedListener(this);
         wybor_klasy.setSelection(classNumber);

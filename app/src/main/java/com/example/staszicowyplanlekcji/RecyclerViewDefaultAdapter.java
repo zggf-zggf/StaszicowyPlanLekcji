@@ -35,14 +35,14 @@ public class RecyclerViewDefaultAdapter extends RecyclerView.Adapter<RecyclerVie
         holder.godzView.setText(mRows.get(position).getGodz());
         if(mRows.get(position).getZastepstwo()=="") {
             holder.lekcjaView.setText(mRows.get(position).getLekcja());
-            holder.wholeView.setBackgroundColor(context.getResources().getColor(R.color.lightYellow));
-            holder.lekcjaView.setBackgroundColor(context.getResources().getColor(R.color.lightYellow));
-            holder.godzView.setBackgroundColor(context.getResources().getColor(R.color.strongYellow));
+            holder.wholeView.setBackgroundColor(context.getResources().getColor(R.color.lightMain));
+            holder.lekcjaView.setBackgroundColor(context.getResources().getColor(R.color.lightMain));
+            holder.godzView.setBackgroundColor(context.getResources().getColor(R.color.strongMain));
         }else{
             holder.lekcjaView.setText(mRows.get(position).getZastepstwo());
-            holder.wholeView.setBackgroundColor(context.getResources().getColor(R.color.lightRed));
-            holder.lekcjaView.setBackgroundColor(context.getResources().getColor(R.color.lightRed));
-            holder.godzView.setBackgroundColor(context.getResources().getColor(R.color.strongRed));
+            holder.wholeView.setBackgroundColor(context.getResources().getColor(R.color.lightAlert));
+            holder.lekcjaView.setBackgroundColor(context.getResources().getColor(R.color.lightAlert));
+            holder.godzView.setBackgroundColor(context.getResources().getColor(R.color.strongAlert));
         }
     }
 

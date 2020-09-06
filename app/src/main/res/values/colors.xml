@@ -3,8 +3,12 @@
     <color name="colorPrimary">#008577</color>
     <color name="colorPrimaryDark">#00574B</color>
     <color name="colorAccent">#D81B60</color>
-    <color name="lightRed">#f2aaaa</color>
-    <color name="strongRed">#e36387</color>
-    <color name="lightYellow">#DDF3F5</color>
-    <color name="strongYellow">#a6dcef</color>
+    <color name="lightAlert">#f2aaaa</color>
+    <color name="strongAlert">#e36387</color>
+    <color name="lightMain">#DDF3F5</color>
+    <color name="strongMain">#a6dcef</color>
+    <color name="defaultText">#000000</color>
+    <color name="defaulBackground">#FFFFFF</color>
+    <color name="buttonLight">#EEEEEE</color>
+    <color name="buttonDark">#CCCCCC</color>
 </resources>

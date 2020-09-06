@@ -2,6 +2,7 @@ package com.example.staszicowyplanlekcji;
 
 import androidx.appcompat.app.ActionBar;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.appcompat.app.AppCompatDelegate;
 import androidx.fragment.app.DialogFragment;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
@@ -22,6 +23,7 @@ import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import org.jsoup.Connection;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
@@ -42,6 +44,7 @@ public class MainActivity extends AppCompatActivity {
     Button nextButton;
     Button prevButton;
     Button settButton;
+    Boolean useDarkmode = false;
     Boolean showSala = true;
     Boolean showNauczyciel = true;
     List<String> nazwy_klas = new ArrayList<>();
@@ -63,6 +66,24 @@ public class MainActivity extends AppCompatActivity {
         settButton = findViewById(R.id.settingsButton);
         SharedPreferencesManager spm = new SharedPreferencesManager(this);
         classNumber = spm.getWybrana();
+        useDarkmode = spm.getDarkmode();
+        showNauczyciel = spm.getNaucz();
+        showSala = spm.getSala();
+        calendar.set(Calendar.DAY_OF_MONTH, spm.getDay());
+        calendar.set(Calendar.MONTH, spm.getMonth());
+        calendar.set(Calendar.YEAR, spm.getYear());
+        if(useDarkmode) {
+            AppCompatDelegate
+                    .setDefaultNightMode(
+                            AppCompatDelegate
+                                    .MODE_NIGHT_YES);
+        }else{
+            AppCompatDelegate
+                    .setDefaultNightMode(
+                            AppCompatDelegate
+                                    .MODE_NIGHT_NO);
+        }
+
         new loadClasses().execute();
         recyclerView = findViewById(R.id.recycler);
         adapter = new RecyclerViewDefaultAdapter(this, zajecia);
@@ -117,6 +138,10 @@ public class MainActivity extends AppCompatActivity {
         @Override
         protected void onPostExecute(Void aVoid) {
             super.onPostExecute(aVoid);
+            if(nazwy_klas.size()==0){
+                Toast.makeText(getApplicationContext(), "Brak internetu :(", Toast.LENGTH_LONG).show();
+                return;
+            }
             saveKlasy();
             calendarChanged(calendar);
         }
@@ -128,6 +153,11 @@ public class MainActivity extends AppCompatActivity {
         @Override
         protected void onPostExecute(Void aVoid) {
             super.onPostExecute(aVoid);
+            if(zajecia.size()<4){
+                Toast.makeText(getApplicationContext(), "Coś poszło nie tak... Ponawianie próby", Toast.LENGTH_LONG);
+                new loadDay().execute();
+                return;
+            }
             while(zajecia.get(zajecia.size()-1).getLekcja()=="")zajecia.remove(zajecia.size()-1);
             new loadZastepstwa().execute();
         }
@@ -205,15 +235,15 @@ public class MainActivity extends AppCompatActivity {
         }else c.add(Calendar.DATE, -1);
     }
     public void repairDate(Calendar c){
-        if(c.get(Calendar.DAY_OF_WEEK)==0){
-            c.add(Calendar.DATE, 1);
+        if(c.get(Calendar.DAY_OF_WEEK)==1){
+            c.add(Calendar.DATE, 2);
         }else if(c.get(Calendar.DAY_OF_WEEK)==7){
             c.add(Calendar.DATE, 2);
         }
     }
 
     private void calendarChanged(Calendar c){
-        tekst.setText(nazwy_klas.get(classNumber)+" "+dayParser(c.get(Calendar.DAY_OF_WEEK))+", "+Integer.toString(c.get(Calendar.DAY_OF_MONTH))+"."+Integer.toString(c.get(Calendar.MONTH)+1)+"."+Integer.toString(c.get(Calendar.YEAR)));
+        tekst.setText(nazwy_klas.get(classNumber)+" "+dayParser(c.get(Calendar.DAY_OF_WEEK))+", "+parseFullDate(calendar, false, '.'));
 
         new loadDay().execute();
     }
@@ -229,25 +259,25 @@ public class MainActivity extends AppCompatActivity {
         @Override
         protected Void doInBackground(Void... voids) {
             System.out.println("Ladowanie Zastepstw");
-            String day, month, year;
-            year = Integer.toString(calendar.get(Calendar.YEAR));
-            month = Integer.toString(calendar.get(Calendar.MONTH)+1);
-            day = Integer.toString(calendar.get(Calendar.DAY_OF_MONTH));
-            if(day.length()==1) day = "0"+day;
-            if(month.length()==1) month = "0"+month;
 
-            String url = Constants.ZAS_URL+year+"-"+month+"-"+day;
+            String url = Constants.ZAS_URL+parseFullDate(calendar, true, '-');
 
             try {
                 Document doc = Jsoup.connect(url).get();
-                System.out.println("connected Successfully");
+                String nieobecny = "";
                 for(Element row : doc.select("tr")){
+                    if(row.is(":has(.st1)")) {
+                        nieobecny = row.text();
+                        nieobecny = nieobecny.substring(0, 1) + ". " + nieobecny.split(" ")[1];
+                    }else
                     if(row.is(":contains("+nazwy_klas.get(classNumber)+")")){
                         int godz = Integer.parseInt(row.select(":eq(0)").text());
                         String message = row.select(":eq(2)").text();
                         if(message==""){
                             message = row.select(":eq(1)").text();
                             message = message.substring(message.indexOf('-')+2, message.length());
+                        }else{
+                            message = nieobecny+"->"+message;
                         }
                         zajecia.get(godz-1).setZastepstwo(message);
                         System.out.println(godz+": "+zajecia.get(godz-1).getZastepstwo());
@@ -314,7 +344,24 @@ public class MainActivity extends AppCompatActivity {
             System.out.println(calendar.get(Calendar.MONTH));
             System.out.println(calendar.get(Calendar.YEAR));
             classNumber = spm.getWybrana();
-            calendarChanged(calendar);
+            useDarkmode = spm.getDarkmode();
+            finish();
+            overridePendingTransition(0, 0);
+            startActivity(getIntent());
+            overridePendingTransition(0, 0);
+            /*calendarChanged(calendar);
+            adapter.notifyDataSetChanged();*/
         }
-    }//onActivityResult
+    }
+
+    String parseFullDate(Calendar calendar, Boolean flip, char separator){
+        String day, month, year;
+        year = Integer.toString(calendar.get(Calendar.YEAR));
+        month = Integer.toString(calendar.get(Calendar.MONTH)+1);
+        day = Integer.toString(calendar.get(Calendar.DAY_OF_MONTH));
+        if(day.length()==1) day = "0"+day;
+        if(month.length()==1) month = "0"+month;
+        if(flip) return year+separator+month+separator+day;
+        else return day+separator+month+separator+day;
+    }
 }

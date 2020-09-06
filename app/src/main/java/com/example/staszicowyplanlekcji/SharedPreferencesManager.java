@@ -16,6 +16,7 @@ public class SharedPreferencesManager {
     final static String KEY_DAY = "day";
     final static String KEY_MONTH = "month";
     final static String KEY_YEAR = "year";
+    final static String KEY_DARKMODE = "darkmode";
 
     SharedPreferencesManager(Context c){
         context=c;
@@ -54,6 +55,11 @@ public class SharedPreferencesManager {
     public int getYear(){
         SharedPreferences sharedPreferences = context.getSharedPreferences(KEY_NAME, MODE_PRIVATE);
         return sharedPreferences.getInt(KEY_YEAR, 0);
+    }
+
+    public Boolean getDarkmode(){
+        SharedPreferences sharedPreferences = context.getSharedPreferences(KEY_NAME, MODE_PRIVATE);
+        return sharedPreferences.getBoolean(KEY_DARKMODE, false);
     }
 
     public void setLekcje(String s){
@@ -109,6 +115,14 @@ public class SharedPreferencesManager {
         SharedPreferences.Editor editor = sharedPreferences.edit();
 
         editor.putInt(KEY_YEAR, i);
+        editor.apply();
+    }
+
+    public void setDarkmode(Boolean i){
+        SharedPreferences sharedPreferences = context.getSharedPreferences(KEY_NAME, MODE_PRIVATE);
+        SharedPreferences.Editor editor = sharedPreferences.edit();
+
+        editor.putBoolean(KEY_DARKMODE, i);
         editor.apply();
     }
 }

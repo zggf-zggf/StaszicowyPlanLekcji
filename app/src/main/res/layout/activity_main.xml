@@ -5,11 +5,12 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
-    tools:context=".MainActivity">
+    tools:context=".MainActivity"
+    android:background="@color/defaulBackground">
 
     <TextView
+        android:textColor="@color/defaultText"
         android:layout_marginTop="15dp"
-        android:textColor="#000000"
         android:fontFamily="sans-serif-condensed-medium"
         android:text="Czekaj..."
         android:layout_margin="10dp"
@@ -23,6 +24,7 @@
     </TextView>
 
     <androidx.recyclerview.widget.RecyclerView
+        android:textColor="@color/defaultText"
         android:layout_marginTop="10dp"
         android:id="@+id/recycler"
         android:layout_width="match_parent"
@@ -42,30 +44,33 @@
         app:layout_constraintBottom_toBottomOf="parent">
 
         <Button
+            android:textColor="@color/defaultText"
             android:shadowColor="@android:color/transparent"
             android:id="@+id/prev"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_marginRight="0dp"
-            android:background="#CCCCCC"
+            android:background="@color/buttonDark"
             android:layout_weight="1"
             android:text="poprzedni"></Button>
         <Button
+            android:textColor="@color/defaultText"
             android:shadowColor="@android:color/transparent"
             android:id="@+id/settingsButton"
             android:layout_width="0dp"
             android:layout_height="match_parent"
-            android:background="#EEEEEE"
+            android:background="@color/buttonLight"
             android:text="&#9776;"
             android:layout_weight="0.5">
         </Button>
 
         <Button
+            android:textColor="@color/defaultText"
             android:shadowColor="@android:color/transparent"
             android:id="@+id/next"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:background="#CCCCCC"
+            android:background="@color/buttonDark"
             android:layout_weight="1"
             android:text="nastepny"></Button>
     </LinearLayout>
