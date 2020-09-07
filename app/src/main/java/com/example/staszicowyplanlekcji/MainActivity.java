@@ -60,7 +60,6 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
         tekst = findViewById(R.id.dataText);
         calendar = Calendar.getInstance();
-        repairDate(calendar);
         nextButton = findViewById(R.id.next);
         prevButton = findViewById(R.id.prev);
         settButton = findViewById(R.id.settingsButton);
@@ -84,6 +83,7 @@ public class MainActivity extends AppCompatActivity {
                                     .MODE_NIGHT_NO);
         }
 
+        repairDate(calendar);
         new loadClasses().execute();
         recyclerView = findViewById(R.id.recycler);
         adapter = new RecyclerViewDefaultAdapter(this, zajecia);
@@ -362,6 +362,6 @@ public class MainActivity extends AppCompatActivity {
         if(day.length()==1) day = "0"+day;
         if(month.length()==1) month = "0"+month;
         if(flip) return year+separator+month+separator+day;
-        else return day+separator+month+separator+day;
+        else return day+separator+month+separator+year;
     }
 }

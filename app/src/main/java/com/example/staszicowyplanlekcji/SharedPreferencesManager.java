@@ -4,6 +4,8 @@ import android.content.Context;
 import android.content.SharedPreferences;
 import android.text.BoringLayout;
 
+import java.util.Calendar;
+
 import static android.content.Context.MODE_PRIVATE;
 
 public class SharedPreferencesManager {
@@ -18,8 +20,11 @@ public class SharedPreferencesManager {
     final static String KEY_YEAR = "year";
     final static String KEY_DARKMODE = "darkmode";
 
+    Calendar cal;
+
     SharedPreferencesManager(Context c){
         context=c;
+        cal = Calendar.getInstance();
     }
 
     public String getLekcje(){
@@ -44,17 +49,17 @@ public class SharedPreferencesManager {
 
     public int getDay(){
         SharedPreferences sharedPreferences = context.getSharedPreferences(KEY_NAME, MODE_PRIVATE);
-        return sharedPreferences.getInt(KEY_DAY, 0);
+        return sharedPreferences.getInt(KEY_DAY, cal.get(Calendar.DAY_OF_MONTH));
     }
 
     public int getMonth(){
         SharedPreferences sharedPreferences = context.getSharedPreferences(KEY_NAME, MODE_PRIVATE);
-        return sharedPreferences.getInt(KEY_MONTH, 0);
+        return sharedPreferences.getInt(KEY_MONTH, cal.get(Calendar.MONTH));
     }
 
     public int getYear(){
         SharedPreferences sharedPreferences = context.getSharedPreferences(KEY_NAME, MODE_PRIVATE);
-        return sharedPreferences.getInt(KEY_YEAR, 0);
+        return sharedPreferences.getInt(KEY_YEAR, cal.get(Calendar.YEAR));
     }
 
     public Boolean getDarkmode(){
